@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ioanlucut/pi-skill-toggle/skill-toggle.schema.json",
+  "title": "pi-skill-toggle settings",
+  "description": "Which skills Pi lists for the model (on) and which stay available only on request (off).",
+  "type": "object",
+  "required": ["onDemandSkills"],
+  "additionalProperties": false,
+  "definitions": {
+    "exactNames": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[^*]+$" }
+    },
+    "namePatterns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "description": "Settings format version. A file without it is read as version 1.",
+      "const": 1
+    },
+    "onDemandSkills": {
+      "description": "Skills that are off in every repository. Exact names only.",
+      "$ref": "#/definitions/exactNames"
+    },
+    "projects": {
+      "description": "Exact repository overrides, keyed by repository identity (for example `repo:github.com/owner/name`). They win over rules and the global list.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "onDemand": { "$ref": "#/definitions/exactNames" },
+          "autoDiscovered": { "$ref": "#/definitions/exactNames" }
+        }
+      }
+    },
+    "rules": {
+      "description": "Ordered rules. For one skill, the last rule that matches the repository wins. Only repositories with a network origin match.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repo"],
+        "additionalProperties": false,
+        "properties": {
+          "repo": {
+            "description": "Pattern for the repository identity without `repo:`, for example `github.com/owner/*`. `*` is the only wildcard.",
+            "type": "string",
+            "minLength": 1
+          },
+          "onDemand": {
+            "description": "Skills that are off in matching repositories. `*` is a wildcard.",
+            "$ref": "#/definitions/namePatterns"
+          },
+          "autoDiscovered": {
+            "description": "Skills that are on in matching repositories. `*` is a wildcard.",
+            "$ref": "#/definitions/namePatterns"
+          }
+        }
+      }
+    }
+  }
+}
